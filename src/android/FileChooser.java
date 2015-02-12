@@ -2,7 +2,9 @@ package com.megster.cordova;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.util.Log;
 
 import org.apache.cordova.CordovaArgs;
@@ -10,6 +12,7 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class FileChooser extends CordovaPlugin {
 
@@ -34,7 +37,7 @@ public class FileChooser extends CordovaPlugin {
         // type and title should be configurable
 
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
+        intent.setType("audio/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
 
@@ -46,7 +49,7 @@ public class FileChooser extends CordovaPlugin {
         callback = callbackContext;
         callbackContext.sendPluginResult(pluginResult);
     }
-
+  
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -55,11 +58,39 @@ public class FileChooser extends CordovaPlugin {
             if (resultCode == Activity.RESULT_OK) {
 
                 Uri uri = data.getData();
-
+                Log.w(TAG, uri.toString());
                 if (uri != null) {
-
-                    Log.w(TAG, uri.toString());
-                    callback.success(uri.toString());
+                	Cursor returnCursor =this.cordova.getActivity().getContentResolver().query(uri, null, null, null, null);
+                	Log.w(TAG,"1");
+                	JSONObject json = new JSONObject();
+                	if(returnCursor !=null)
+                	{
+                		int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+	                	Log.w(TAG,"2");
+	                	returnCursor.moveToFirst();
+	                	Log.w(TAG,"3");
+	                    Log.w(TAG, returnCursor.getString(nameIndex));
+	                    Log.w(TAG,"4");
+	                    try {
+							json.put("name",returnCursor.getString(nameIndex));
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+                	}
+                	 
+                    try {
+						json.put("url",uri.toString());
+						
+						
+						 callback.success(json);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                   
+                    
+                   
 
                 } else {
 
