@@ -6,6 +6,6 @@ module.exports = {
       cordova.exec(success, failure, "FileChooser", "startPlaying", [uri]);
     },
     stop: function (success, failure) {
-         cordova.exec(success, failure, "FileChooser", "stopPlaying");
+         cordova.exec(success, failure, "FileChooser", "stopPlaying",[]);
     },
 };
